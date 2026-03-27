@@ -66,9 +66,18 @@ public class ApiV1PostController {
 
     @PostMapping
     @Operation(summary="글 작성")
-    public RsData<PostWriteResBody> write(@RequestBody @Valid PostWriteReqBody reqBody) {
+    public RsData<PostWriteResBody> write(
+            @RequestBody @Valid PostWriteReqBody reqBody,
+            @RequestParam @NotBlank @Size(min=2, max=30) String username,
+            @RequestParam @NotBlank @Size(min=2, max=30) String password
+    ) {
 
-        Member actor = memberService.findByUsername("user1").get();
+        Member actor = memberService.findByUsername(username).get();
+
+        //패스워드가 다를 경우 -> 중단
+        if (!password.equals(actor.getPassword())) {
+            throw new IllegalArgumentException("05-password-비밀번호가 일치하지 않습니다.");
+        }
 
         Post post = postService.write(actor, reqBody.title, reqBody.content);
         long postsCount = postService.count();
@@ -105,7 +114,9 @@ public class ApiV1PostController {
     @Transactional
     public RsData<PostModifyResBody> modify(
             @PathVariable int id,
-            @RequestBody @Valid PostModifyReqBody reqBody
+            @RequestBody @Valid PostModifyReqBody reqBody,
+            @RequestParam @NotBlank @Size(min=2, max=30) String username,
+            @RequestParam @NotBlank @Size(min=2,max=30) String password
     ) {
 
         Post post = postService.modify(id, reqBody.title, reqBody.content);
