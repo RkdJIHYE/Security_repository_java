@@ -33,7 +33,7 @@ public class ApiV1MemberController {
     @PostMapping("/join")
     public RsData<MemberDto> join(@RequestBody @Valid MemberJoinReqBody reqBody) {
 
-        Member member = memberService.join(reqBody.username, reqBody.password, reqBody.nickname);
+        Member member =memberService.join(reqBody.username, reqBody.password, reqBody.nickname);
 
         return new RsData(
                 "회원가입이 완료되었습니다. %s님 환영합니다.".formatted(member.getName()),
