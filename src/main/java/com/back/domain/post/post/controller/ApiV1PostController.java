@@ -75,10 +75,6 @@ public class ApiV1PostController {
 
         Member actor = rq.getActor(); // 인증된 사용자 정보 가져오기
 
-
-
-
-
         Post post = postService.write(actor, reqBody.title, reqBody.content);
         long postsCount = postService.count();
 
