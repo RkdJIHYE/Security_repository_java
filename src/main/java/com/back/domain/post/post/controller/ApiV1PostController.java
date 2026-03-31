@@ -1,14 +1,13 @@
 package com.back.domain.post.post.controller;
 
 import com.back.domain.member.entity.Member;
-
 import com.back.domain.post.post.dto.PostDto;
 import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.service.PostService;
-import com.back.global.exception.ServiceException;
 import com.back.global.rq.Rq;
 import com.back.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -23,7 +22,8 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/posts")
-@Tag(name = "ApiV1PostController", description = "글 API")
+@Tag(name = "ApiV1PostController", description = "글 API, 인증의 경우 헤더가 쿠키보다 우선한다.")
+@SecurityRequirement(name = "bearerAuth")
 public class ApiV1PostController {
 
     private final PostService postService;
@@ -70,7 +70,6 @@ public class ApiV1PostController {
     @Operation(summary = "글 작성")
     public RsData<PostWriteResBody> write(
             @RequestBody @Valid PostWriteReqBody reqBody
-
     ) {
 
         Member actor = rq.getActor(); // 인증된 사용자 정보 가져오기
@@ -111,12 +110,13 @@ public class ApiV1PostController {
     public RsData<PostModifyResBody> modify(
             @PathVariable int id,
             @RequestBody @Valid PostModifyReqBody reqBody
-
     ) {
 
         Member actor = rq.getActor(); // 인증된 사용자 정보 가져오기
+
         Post post = postService.findById(id).get();
         post.checkModify(actor);
+
         postService.modify(id, reqBody.title, reqBody.content);
 
         return new RsData<>(
@@ -132,12 +132,13 @@ public class ApiV1PostController {
     @Operation(summary = "글 삭제")
     public RsData<Void> delete(
             @PathVariable int id
-
     ) {
 
         Member actor = rq.getActor(); // 인증된 사용자 정보 가져오기
+
         Post post = postService.findById(id).get();
         post.checkDelete(actor);
+
         postService.deleteById(id);
 
         return new RsData<>(
