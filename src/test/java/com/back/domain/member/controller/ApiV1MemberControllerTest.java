@@ -136,6 +136,10 @@ public class ApiV1MemberControllerTest {
 
                     assertThat(apiKeyCookie).isNotNull();
                     assertThat(apiKeyCookie.getValue()).isEqualTo(apiKey);
+
+                    assertThat(apiKeyCookie.getPath()).isEqualTo("/");
+                    assertThat(apiKeyCookie.isHttpOnly()).isTrue();
+                    assertThat(apiKeyCookie.getDomain()).isEqualTo("localhost");
                 }
         );
     }
@@ -164,4 +168,5 @@ public class ApiV1MemberControllerTest {
                 .andExpect(jsonPath("$.modifyDate").value(member.getModifyDate().toString()))
                 .andExpect(jsonPath("$.name").value(member.getName()));
     }
+
 }
