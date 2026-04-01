@@ -6,8 +6,6 @@ import jakarta.persistence.Entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-
-
 @Entity
 @Getter
 @NoArgsConstructor
@@ -25,6 +23,11 @@ public class Member extends BaseEntity {
         this.password = password;
         this.nickname = nickname;
         this.apiKey = apiKey;
+    }
+
+    public Member(int id, String name) {
+        this.setId(id);
+        this.nickname = name;
     }
 
     public String getName() {
