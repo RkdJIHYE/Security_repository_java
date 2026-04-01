@@ -57,7 +57,7 @@ public class Ut {
 
         }
 
-        public static Map payload(String jwt, String secret) {
+        public static Map<String,Object> payload(String jwt, String secret) {
             byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
             SecretKey secretKey = Keys.hmacShaKeyFor(keyBytes);
 
