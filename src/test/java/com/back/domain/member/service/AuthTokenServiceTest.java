@@ -1,4 +1,5 @@
 package com.back.domain.member.service;
+
 import com.back.domain.member.entity.Member;
 import com.back.domain.member.repository.MemberRepository;
 import com.back.standard.ut.Ut;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,7 +40,7 @@ public class AuthTokenServiceTest {
         Map<String, Object> payload = Map.of("name", "Paul", "age", 23);
 
         String jwt = Ut.jwt.toString(secretPattern, expireSeconds, payload);
-        Map<String, Object> parsedPayload = Ut.jwt.payload(jwt, secretPattern);
+        Map<String, Object> parsedPayload = Ut.jwt.payloadOrNull(jwt, secretPattern);
 
         assertThat(parsedPayload)
                 .containsAllEntriesOf(payload);
@@ -73,6 +75,15 @@ public class AuthTokenServiceTest {
         Member member1 = memberRepository.findByUsername("user1").get();
         String accessToken = authTokenService.genAccessToken(member1);
         assertThat(accessToken).isNotBlank();
+
+        Map<String, Object> payload = authTokenService.payloadOrNull(accessToken);
+
+        assertThat(payload).containsAllEntriesOf(
+                Map.of(
+                        "id", member1.getId(),
+                        "name", member1.getName()
+                )
+        );
 
         System.out.println("accessToken = " + accessToken);
 
