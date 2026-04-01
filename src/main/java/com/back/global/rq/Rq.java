@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -18,24 +19,12 @@ public class Rq {
     private final HttpServletRequest request;
     private final HttpServletResponse response;
     private final MemberService memberService;
-
-    public void addCookie(String name, String value) {
-
-        Cookie cookie = new Cookie(name, value);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        cookie.setDomain("localhost");
-
-        response.addCookie(
-                cookie
-        );
-    }
-
     public Member getActor() {
 
-        String authorizationHeader = request.getHeader("Authorization");
+        String authorizationHeader = getHeader("Authorization", "");
 
         String apiKey;
+        String accessToken;
 
         if (authorizationHeader != null) {
             // 헤더 방식
@@ -43,16 +32,12 @@ public class Rq {
                 throw new ServiceException("401-2", "잘못된 형식의 인증데이터입니다.");
             }
 
-            apiKey = authorizationHeader.replace("Bearer ", "");
+            String[] headerAuthorizationBits = authorizationHeader.split(" ", 3);            apiKey = authorizationHeader.replace("Bearer ", "");
+            apiKey = headerAuthorizationBits[1];
+            accessToken = headerAuthorizationBits.length == 3 ? headerAuthorizationBits[2] : "";
         } else {
-            // 쿠키 방식
-            apiKey = request.getCookies() == null ? ""
-                    : Arrays.stream(request.getCookies())
-                    .filter(cookie -> cookie.getName().equals("apiKey"))
-                    .map(Cookie::getValue)
-                    .findFirst()
-                    .orElse("");
-
+            apiKey = getCookieValue("apiKey", "");
+            accessToken = getCookieValue("accessToken", "");
         }
 
         if(apiKey.isBlank()) {
@@ -64,6 +49,27 @@ public class Rq {
         );
     }
 
+    private String getHeader(String name, String defaultValue) {
+        return Optional
+                .ofNullable(request.getHeader(name))
+                .filter(headerValue -> !headerValue.isBlank())
+                .orElse(defaultValue);
+    }
+
+    private String getCookieValue(String name, String defaultValue) {
+        return Optional
+                .ofNullable(request.getCookies())
+                .flatMap(
+                        cookies ->
+                                Arrays.stream(cookies)
+                                        .filter(cookie -> cookie.getName().equals(name))
+                                        .map(Cookie::getValue)
+                                        .filter(value -> !value.isBlank())
+                                        .findFirst()
+                )
+                .orElse(defaultValue);
+    }
+
     public void deleteCookie(String name) {
         Cookie cookie = new Cookie(name, "");
         cookie.setPath("/");
@@ -72,5 +78,17 @@ public class Rq {
         cookie.setMaxAge(0);
 
         response.addCookie(cookie);
+    }
+
+    public void addCookie(String name, String value) {
+
+        Cookie cookie = new Cookie(name, value);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setDomain("localhost");
+
+        response.addCookie(
+                cookie
+        );
     }
 }
