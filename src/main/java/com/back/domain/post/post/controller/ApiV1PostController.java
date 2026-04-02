@@ -1,6 +1,7 @@
 package com.back.domain.post.post.controller;
 
 import com.back.domain.member.entity.Member;
+import com.back.domain.member.service.MemberService;
 import com.back.domain.post.post.dto.PostDto;
 import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.service.PostService;
@@ -27,6 +28,7 @@ import java.util.List;
 public class ApiV1PostController {
 
     private final PostService postService;
+    private final MemberService memberService;
     private final Rq rq;
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -62,7 +64,6 @@ public class ApiV1PostController {
 
     record PostWriteResBody(
             PostDto postDto
-
     ) {
     }
 
@@ -73,16 +74,16 @@ public class ApiV1PostController {
     ) {
 
         Member actor = rq.getActor(); // 인증된 사용자 정보 가져오기
+        // actor가 id, username만 가지고 있는 짝퉁 멤버
 
-        Post post = postService.write(actor, reqBody.title, reqBody.content);
-
+        Member author = memberService.findById(actor.getId()).get();
+        Post post = postService.write(author, reqBody.title, reqBody.content);
 
         return new RsData<>(
                 "%d번 게시물이 생성되었습니다.".formatted(post.getId()),
                 "201-1",
                 new PostWriteResBody(
                         new PostDto(post)
-
                 )
         );
     }
@@ -130,6 +131,7 @@ public class ApiV1PostController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "글 삭제")
+    @Transactional
     public RsData<Void> delete(
             @PathVariable int id
     ) {
@@ -137,6 +139,7 @@ public class ApiV1PostController {
         Member actor = rq.getActor(); // 인증된 사용자 정보 가져오기
 
         Post post = postService.findById(id).get();
+        System.out.println(post.getAuthor().getId());
         post.checkDelete(actor);
 
         postService.deleteById(id);
