@@ -36,8 +36,8 @@ logging:
     org.hibernate.orm.jdbc.extract: TRACE
     org.springframework.transaction.interceptor: TRACE
 
-#사용자 정의 변수
+# 사용자 정의 설정 변수
 custom:
   jwt:
-    secretPattern : abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890
-    expiration : "#{1000L * 60 * 60 * 24 *365}"
+    secretPattern: abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890
+    expiration: "#{15 * 60}" # 초 단위 (현재 설정값 -> 15분)
