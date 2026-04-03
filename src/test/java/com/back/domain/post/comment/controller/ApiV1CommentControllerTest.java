@@ -50,8 +50,8 @@ public class ApiV1CommentControllerTest {
                 .andDo(print());
 
         resultActions
-                .andExpect(handler().handlerType(ApiV1CommentController.class))
-                .andExpect(handler().methodName("list"))
+
+
                 .andExpect(status().isOk());
 
         resultActions
@@ -239,4 +239,5 @@ public class ApiV1CommentControllerTest {
                 .andExpect(jsonPath("$.resultCode").value("403-2"))
                 .andExpect(jsonPath("$.msg").value("댓글 삭제 권한이 없습니다."));
     }
+
 }

@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -85,10 +85,11 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
         boolean isAccessTokenExists = !accessToken.isBlank();
         boolean isAccessTokenValid = false;
+        boolean isApiKeyExists = !apiKey.isBlank();
 
-        if (apiKey.isBlank()) {
-            throw new ServiceException("401-1", "apiKey가 존재하지 않습니다.");
-        }
+//        if (apiKey.isBlank()) {
+//            throw new ServiceException("401-1", "apiKey가 존재하지 않습니다.");
+//        }
 
         if (isAccessTokenExists) {
             Map<String, Object> payload = memberService.payloadOrNull(accessToken);
@@ -100,6 +101,11 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
                 member = new Member(id, username, nickname);
                 isAccessTokenValid = true;
             }
+        }
+
+        if(!isApiKeyExists) {
+            filterChain.doFilter(request, response);
+            return;
         }
 
         // accessToken으로 인증이 제대로 이루어지지 않은 경우
@@ -116,9 +122,11 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
         }
 
         // SecurityContextHolder에 인증데이터 저장
-        UserDetails user = new User(
+        UserDetails user = new SecurityUser(
+                member.getId(),
                 member.getUsername(),
                 member.getPassword(),
+                member.getNickname(),
                 List.of()
         );
 
@@ -135,5 +143,4 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
-
 }
