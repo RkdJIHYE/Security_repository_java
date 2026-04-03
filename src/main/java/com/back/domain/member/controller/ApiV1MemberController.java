@@ -66,10 +66,7 @@ public class ApiV1MemberController {
 
         memberService.checkPassword(reqBody.password, actor.getPassword());
 
-
-
         rq.addCookie("apiKey", actor.getApiKey());
-
         String accessToken = memberService.genAccessToken(actor);
         rq.addCookie("accessToken", accessToken);
 
@@ -97,8 +94,9 @@ public class ApiV1MemberController {
     @GetMapping("/me")
     public MemberDto me() {
 
-        // 인증
-        Member tmpActor = rq.getActor();
+        // 인증 작업이 없다
+
+        Member tmpActor = rq.getActor(); // user1 정보
 
         // 내 전체 회원 정보 조회가 목적
         Member realActor = memberService.findById(tmpActor.getId()).get();
